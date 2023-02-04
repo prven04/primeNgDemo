@@ -14,27 +14,39 @@ export class UserProfileComponent implements OnInit {
   constructor(public userAPIService: UserAPIService, private confirmationService: ConfirmationService, private dialogService: DialogService) { }
 
   ngOnInit(): void {
+    this.getUserProfiles();
+  }
+
+  getUserProfiles(){
     this.userAPIService.getUserProfiles().subscribe((res) => {
       this.userProfiles = res;
     })
   }
 
-  confirm() {
+  confirm(user:any) {
     this.confirmationService.confirm({
       message: 'Are you sure that you want to perform this action?',
       accept: () => {
-        //Actual logic to perform a confirmation
+        this.userAPIService.deleteUserProfile(user).subscribe((res)=>{
+          this.getUserProfiles();
+        })
       }
     });
   }
 
-  show(actionType: string) {
+  show(actionType: string,selectedUSer?:any) {
     const ref = this.dialogService.open(SharedComponent, {
       data: {
-        buttonName: actionType === 'add' ? 'SAVE USER' : 'UPDATE USER'
+        buttonName: actionType === 'add' ? 'SAVE USER' : 'UPDATE USER',
+        selectedUSer:selectedUSer
       },
       header: 'Add User Profile Here',
       width: '40%'
     });
+
+    ref.onClose.subscribe(()=>{
+      this.getUserProfiles();
+    })
   }
+
 }
